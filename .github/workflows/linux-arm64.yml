@@ -29,7 +29,7 @@ jobs:
           echo "${{ github.workspace }}/venv/bin" >> $GITHUB_PATH
       - name: Clone Google V8
         run: |
-          pip install wheel
+          pip install setuptools wheel
           echo "::group::Clone Google V8"
           python setup.py checkout_v8
           echo "::endgroup::"
@@ -48,7 +48,7 @@ jobs:
         continue-on-error: false
         run: |
           echo "v8-hash=${{ hashFiles('v8/src/**') }}" >> "$GITHUB_OUTPUT"
-          pip install wheel
+          pip install setuptools wheel
           echo "::group::v8"
           python setup.py v8
           echo "::endgroup::"
