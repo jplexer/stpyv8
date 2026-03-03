@@ -26,9 +26,9 @@ jobs:
       - name: Create virtual environment
         run: |
           python -m venv venv
-          echo "${{ github.workspace }}/venv/bin" >> $GITHUB_PATH
       - name: Clone Google V8
         run: |
+          source venv/bin/activate
           pip install setuptools wheel
           echo "::group::Clone Google V8"
           python setup.py checkout_v8
@@ -48,6 +48,7 @@ jobs:
         continue-on-error: false
         run: |
           echo "v8-hash=${{ hashFiles('v8/src/**') }}" >> "$GITHUB_OUTPUT"
+          source venv/bin/activate
           pip install setuptools wheel
           echo "::group::v8"
           python setup.py v8
@@ -87,7 +88,6 @@ jobs:
       - name: Create virtual environment
         run: |
           python -m venv venv
-          echo "${{ github.workspace }}/venv/bin" >> $GITHUB_PATH
       - name: Download Boost
         id: download-boost
         uses: suisei-cn/actions-download-file@v1.6.0
@@ -111,9 +111,11 @@ jobs:
           key: linux-arm64-build-v8-${{ needs.build-v8.outputs.v8-hash }}
       - name: Install dependencies
         run: |
+          source venv/bin/activate
           pip install --upgrade pip setuptools wheel auditwheel patchelf pytest pytest-order
       - name: Build wheel
         run: |
+          source venv/bin/activate
           python setup.py sdist bdist_wheel --skip-build-v8 -d stpyv8-linux-arm64-wheelhouse-${{ matrix.python-version }}
         env:
           INCLUDE: ${{ env.INCLUDE }};${{ steps.install-python.outputs.python-path
@@ -122,12 +124,15 @@ jobs:
           LDFLAGS: -L/usr/lib -L/usr/lib/aarch64-linux-gnu
       - name: Repair wheel
         run: |
+          source venv/bin/activate
           auditwheel repair --plat manylinux_2_35_aarch64 -w stpyv8-linux-arm64-${{ matrix.python-version }} stpyv8-linux-arm64-wheelhouse-${{ matrix.python-version }}/*.whl
       - name: Install wheel
         run: |
+          source venv/bin/activate
           pip install stpyv8-linux-arm64-${{ matrix.python-version }}/*.whl
       - name: Test wheel
         run: |
+          source venv/bin/activate
           pytest -v
       - name: Upload wheel
         uses: actions/upload-artifact@v4
